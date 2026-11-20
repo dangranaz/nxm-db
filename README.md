@@ -1,39 +1,50 @@
-# nxm_db
+<div align="center">
 
-Datasource auto-configuration per i server MCP del progetto.
+# nxm-db
 
-## Scopo
+<!-- Licensed MIT — part of the nxm tooling. -->
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Rust](https://img.shields.io/badge/Rust-1.75%2B-000000?logo=rust&logoColor=white)](https://www.rust-lang.org)
+[![SQLite](https://img.shields.io/badge/SQLite-supported-003B57?logo=sqlite&logoColor=white)](https://www.sqlite.org/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-supported-4169E1?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-supported-4DB33D?logo=mongodb&logoColor=white)](https://www.mongodb.com/)
+[![Version](https://img.shields.io/badge/version-0.2.0-blue)](CHANGELOG.md)
 
-`nxm_db` è un brick di auto-configurazione del datasource, nello spirito di uno
-starter Spring Boot: gli si dà una config e restituisce un backend pronto
-(SQLite) + pool di connessioni + runner di migrazioni + tenant. Da locale a
-multi-tenant il passaggio è una modifica di configurazione, non di codice.
+**Datasource auto-configuration for NXM MCP servers**
 
-Non è un ORM, non è un query builder, non è un'astrazione di entità: i prodotti
-possiedono il proprio schema ("schema di competenza") con i propri repository e
-la propria implementazione di backend. Questa crate fornisce solo il runtime e
-la configurazione su cui appoggiano.
+<br>
 
-SQLite è l'unico backend.
+<picture>
+  <source srcset="docs/assets/nexum-banner.webp" type="image/webp">
+  <img src="docs/assets/nexum-banner.png" alt="Nexum-AI banner" width="1000" height="553">
+</picture>
 
-## Cosa fornisce
+<br>
 
-| Elemento | Descrizione |
-|----------|-------------|
-| `Backend` | Backend selezionato; nell'edizione pubblica solo `Backend::Sqlite`. |
-| `DbConfig` | `backend`, `url` (path del file SQLite, `~` espanso) e `tenant` (default `"default"`). |
-| `DbConfigSource` | Porta implementata dal prodotto per risolvere un `DbConfig`. |
-| `open` / `open_from` | Aprono il backend da un `DbConfig` o da una `DbConfigSource`. |
-| `Db::sqlite_pool` | Restituisce il pool SQLite (`r2d2` + `r2d2_sqlite`). |
-| `Db::migrate` | Applica un `MigrationSet` al backend aperto. |
-| `run_migrations` | Runner puro, backend-agnostico, guidato da `MigrationBackend`. |
-| `DbError` / `Result` | Errore unico della crate (`Config`, `Connection`, `Migration`, ...). |
+`nxm-db` is a datasource auto-configuration brick for NXM MCP servers, in the style of a Spring Boot starter: you provide a configuration and get a ready-to-use backend (SQLite) + connection pool + migration runner + tenant. From local to multi-tenant, the change is configuration, not code.
 
-Migrazioni: `Migration` (versione monotona, nome, SQL `up`), `MigrationSet`
-(valida versioni uniche e strettamente crescenti, senza riordini silenziosi) e
-`run_migrations`, che salta le versioni già applicate e applica le altre in
-ordine. Per SQLite ogni migrazione gira nella propria transazione con tabella di
-versioning creata al primo uso.
+It is not an ORM, not a query builder, not an entity abstraction: products own their own schema ("schema di competenza") with their own repositories and backend implementation. This crate provides only the runtime and configuration they rely on.
+
+SQLite is the only backend in the public edition.
+
+</div>
+
+## What it provides
+
+| Element | Description |
+|---------|-------------|
+| `Backend` | Selected backend; in the public edition only `Backend::Sqlite`. |
+| `DbConfig` | `backend`, `url` (SQLite file path, `~` expanded) and `tenant` (default `"default"`). |
+| `DbConfigSource` | Port implemented by the product to resolve a `DbConfig`. |
+| `open` / `open_from` | Open the backend from a `DbConfig` or a `DbConfigSource`. |
+| `Db::sqlite_pool` | Returns the SQLite pool (`r2d2` + `r2d2_sqlite`). |
+| `Db::migrate` | Applies a `MigrationSet` to the opened backend. |
+| `run_migrations` | Pure, backend-agnostic runner driven by `MigrationBackend`. |
+| `DbError` / `Result` | Single error type of the crate (`Config`, `Connection`, `Migration`, ...). |
+
+Migrations: `Migration` (monotonic version, name, SQL `up`), `MigrationSet` (validates unique and strictly increasing versions, no silent reordering) and `run_migrations`, which skips already-applied versions and applies the others in order. For SQLite, each migration runs in its own transaction with a versioning table created on first use.
+
+## Quick example
 
 ```rust
 use nxm_db::{open_from, DbConfig, DbConfigSource, Migration, MigrationSet, Result};
@@ -62,11 +73,11 @@ fn main() -> Result<()> {
 }
 ```
 
-## Config
+## Configuration
 
-La sezione `db` vive dentro la config del server,
-`~/.nxmconfig/<nome>_config.json`, nel formato JSON canonico (TOML è accettato).
-Il file è caricato da `nxm_mcp_config`; la sezione si estrae con
+The `db` section lives inside the server config,
+`~/.nxmconfig/<name>_config.json`, in canonical JSON format (TOML is accepted).
+The file is loaded by `nxm_mcp_config`; the section is extracted with
 `DbConfig::from_mcp`.
 
 ```json
@@ -79,7 +90,7 @@ Il file è caricato da `nxm_mcp_config`; la sezione si estrae con
 }
 ```
 
-Equivalente TOML:
+Equivalent TOML:
 
 ```toml
 [db]
@@ -100,32 +111,47 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 ```
 
-`tenant` è presente fin dal primo giorno: il passaggio a multi-tenant è
-configurazione, non riscrittura. `DbConfig::default()` è il caso locale
-zero-config (`~/.nxm/shared-db/data.db`, tenant `default`); chi ha già estratto
-la sezione può usare `DbConfig::from_toml(toml::Value)`.
+`tenant` is present from day one: the move to multi-tenant is configuration, not rewrite. `DbConfig::default()` is the local zero-config case (`~/.nxm/shared-db/data.db`, tenant `default`); if you already extracted the section you can use `DbConfig::from_toml(toml::Value)`.
 
 ## Logging
 
-La crate emette eventi `tracing` sui target `nxm_db::runtime`, `nxm_db::sqlite`
-e `nxm_db::migrate` (apertura, uso del pool, applicazione delle migrazioni).
+The crate emits `tracing` events on targets `nxm_db::runtime`, `nxm_db::sqlite`
+and `nxm_db::migrate` (opening, pool usage, migration application).
 
-L'inizializzazione del subscriber spetta sempre al server, via `nxm_mcp_logs`:
-`nxm_db` non installa mai un subscriber globale. Senza init gli eventi vengono
-semplicemente scartati, come da contratto `tracing`.
+Subscriber initialisation is always up to the server, via `nxm_mcp_logs`:
+`nxm-db` never installs a global subscriber. Without init, events are simply
+discarded, as per the `tracing` contract.
 
 ```rust
 use nxm_mcp_logs::init_from_env;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    init_from_env()?; // il server inizializza; nxm_db non lo fa mai
+    init_from_env()?; // the server initialises; nxm-db never does
     // ...
     Ok(())
 }
 ```
 
-## Verifica
+## Installation
+
+```toml
+# Cargo.toml
+[dependencies]
+nxm-db = { path = "../shared/nxm-db" }
+```
+
+Or from crates.io when published:
+
+```toml
+nxm-db = "0.2"
+```
+
+## Tests
 
 ```bash
 cargo test
 ```
+
+## License
+
+Open source, **MIT** license ([LICENSE](LICENSE)).
