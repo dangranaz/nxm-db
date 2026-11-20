@@ -1,6 +1,6 @@
 [package]
 name = "nxm_db"
-version = "0.2.0"
+version = "0.3.0"
 edition = "2021"
 license = "MIT"
 description = "Datasource auto-configuration and connections for NXM MCP servers. A Spring-Boot-style brick (config + pool + migrations + connections), not an ORM. Supports SQLite, PostgreSQL and MongoDB via feature flags."

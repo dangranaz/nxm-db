@@ -8,7 +8,7 @@
 [![SQLite](https://img.shields.io/badge/SQLite-supported-003B57?logo=sqlite&logoColor=white)](https://www.sqlite.org/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-supported-4169E1?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
 [![MongoDB](https://img.shields.io/badge/MongoDB-supported-4DB33D?logo=mongodb&logoColor=white)](https://www.mongodb.com/)
-[![Version](https://img.shields.io/badge/version-0.2.0-blue)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.3.0-blue)](CHANGELOG.md)
 
 **Datasource auto-configuration for NXM MCP servers**
 
