@@ -1,0 +1,73 @@
+[package]
+name = "nxm_db"
+version = "0.2.0"
+edition = "2021"
+license = "MIT"
+description = "Datasource auto-configuration and connections for NXM MCP servers. A Spring-Boot-style brick (config + pool + migrations + connections), not an ORM. Supports SQLite, PostgreSQL and MongoDB via feature flags."
+
+[dependencies]
+nxm-config = { path = "../nxm-config" }
+nxm-logging = { path = "../nxm-logging" }
+tracing = "0.1"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+thiserror = "2"
+toml = "=0.8.23"
+dirs = { version = "=5.0.1", optional = true }
+sqlx = { version = "0.9", optional = true, features = ["runtime-tokio", "tls-rustls", "sqlite", "postgres"] }
+mongodb = { version = "3.10", optional = true }
+tokio = { version = "1", features = ["rt"] }
+
+[features]
+default = ["sqlite", "postgres", "mongodb"]
+sqlite = ["dep:sqlx", "dep:dirs"]
+postgres = ["dep:sqlx"]
+mongodb = ["dep:mongodb"]
+
+[dev-dependencies]
+tempfile = "3"
+tracing-subscriber = { version = "0.3", features = ["fmt", "env-filter"] }
+
+# Standalone crate: empty [workspace] so Cargo never walks up into a parent directory's manifest.
+[workspace]
+
+# Test in sottocartelle: non auto-scoperti da Cargo → registrazione esplicita (rust.md §2).
+[[test]]
+name = "config_test"
+path = "tests/unit/config_test.rs"
+
+[[test]]
+name = "config_from_toml_test"
+path = "tests/unit/config_from_toml_test.rs"
+
+[[test]]
+name = "config_from_mcp_test"
+path = "tests/unit/config_from_mcp_test.rs"
+
+[[test]]
+name = "migration_test"
+path = "tests/unit/migration_test.rs"
+
+[[test]]
+name = "config_source_test"
+path = "tests/integration/config_source_test.rs"
+
+[[test]]
+name = "runtime_test"
+path = "tests/integration/runtime_test.rs"
+
+[[test]]
+name = "sqlite_test"
+path = "tests/integration/sqlite_test.rs"
+
+[[test]]
+name = "migration_sqlite_test"
+path = "tests/integration/migration_sqlite_test.rs"
+
+[[test]]
+name = "logging_test"
+path = "tests/integration/logging_test.rs"
+
+[[test]]
+name = "logging_init_test"
+path = "tests/integration/logging_init_test.rs"

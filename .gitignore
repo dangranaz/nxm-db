@@ -1,0 +1,15 @@
+/target
+**/*.rs.bak
+*.db
+nxm_db-*/
+# External coding-agent scratch dirs (pi.dev, etc.) — never part of the repo
+.pi/
+# External review reports — artifacts of the review step, not repo content
+*-review.md
+review.md
+*REVIEW*.md
+*review*.md
+# Process artifacts (session handoffs, delegation briefs) — not product content.
+# They live in the shared workspace, not in this product repo.
+/sessions/
+/prompts/
